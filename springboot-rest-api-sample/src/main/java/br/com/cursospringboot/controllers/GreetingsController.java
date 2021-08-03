@@ -80,7 +80,7 @@ public class GreetingsController {
     
     @DeleteMapping(value = "delete")
     @ResponseBody //Response - descrição da resposta
-    public ResponseEntity<String> delete(@RequestParam Long id){ //Request body recebe os dados via POST
+    public ResponseEntity<String> delete(@RequestParam(name = "id") Long id){ //Request body recebe os dados via POST
     	
     	usuarioRepository.deleteById(id);
     	

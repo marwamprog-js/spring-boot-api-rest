@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- Bootstrap CSS -->
+<link
+	href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
+	rel="stylesheet"
+	integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC"
+	crossorigin="anonymous">
+
+<title>Projeto Spring Boot</title>
+
+</head>
+<body>
+
+	<div class="container">
+
+		<h1 class="text-center">Spring Boot API Rest</h1>
+		<h3 class="text-center">Crud Completo</h3>
+
+		<form action="" id="formCadastroUser">
+			<div class="mb-3">
+				<label for="id" class="form-label">Id</label> <input type="text"
+					class="form-control" id="id" readonly="readonly">
+			</div>
+			<div class="mb-3">
+				<label for="nome" class="form-label">Nome</label> <input type="text"
+					class="form-control" id="nome" placeholder="Informe o Nome"
+					required="required">
+			</div>
+			<div class="mb-3">
+				<label for="idade" class="form-label">Idade</label> <input
+					type="number" class="form-control" id="idade" required="required">
+			</div>
+
+			<button type="button" class="btn btn-secondary"
+				onclick="this.form.reset();">Novo</button>
+			<button type="button" class="btn btn-primary"
+				onclick="salvarUsuario();">Salvar</button>
+			<button type="button" class="btn btn-danger"
+				onclick="deleteUser('null');">Excluir</button>
+			<button type="button" class="btn btn-success" data-bs-toggle="modal"
+				data-bs-target="#modalPesquisaUser">Pesquisar</button>
+
+
+
+		</form>
+
+	</div>
+
+
+	<!-- Modal -->
+	<div class="modal fade" id="modalPesquisaUser" tabindex="-1"
+		aria-labelledby="exampleModalLabel" aria-hidden="true">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="exampleModalLabel">Pesquisa de
+						Usuário</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal"
+						aria-label="Close"></button>
+				</div>
+				<div class="modal-body">
+
+					<form>
+						<div class="mb-3">
+							<label for="nomeBusca" class="col-form-label">Informe o
+								Nome:</label> <input type="text" class="form-control" id="nomeBusca"
+								placeholder="Informe o nome do Usuário">
+						</div>
+					</form>
+
+					<div style="height: 300px; overflow: scroll;">
+						<table class="table" id="tabelaResultado">
+							<thead>
+								<tr>
+									<th scope="col">#</th>
+									<th scope="col">Nome</th>
+									<th scope="col">Editar</th>
+									<th scope="col">Delete</th>
+								</tr>
+							</thead>
+							<tbody>
+
+							</tbody>
+						</table>
+					</div>
+
+
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-danger"
+						data-bs-dismiss="modal">Fechar</button>
+					<button type="button" class="btn btn-primary"
+						onclick="pesquisaUser();">Buscar</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+
+	<script src="https://code.jquery.com/jquery-3.6.0.min.js"
+		integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
+		crossorigin="anonymous"></script>
+	<script
+		src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+		integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+		crossorigin="anonymous"></script>
+
+	<script type="text/javascript">
+		function salvarUsuario() {
+
+			var id = $('#id').val();
+			var nome = $('#nome').val();
+			var idade = $('#idade').val();
+
+			if(nome == null || nome != null && nome.trim() == ''){
+				alert('Informe o nome');
+				$('#nome').focus();
+				return;
+			}
+			
+			if(idade == null || idade != null && idade.trim() == ''){
+				alert('Informe a idade');
+				$('#idade').focus();
+				return;
+			}
+			
+			$.ajax({
+				method : "POST",
+				url : "salvar",
+				data : JSON.stringify({
+					id : id,
+					nome : nome,
+					idade : idade
+				}),
+				contentType : "application/json; charset=utf-8",
+				success : function(response) {
+					$('#id').val(response.id);
+
+					alert("Salvo com sucesso");
+				}
+			}).fail(function(xhr, status, errorThrown) {
+				alert("Erro ao salvar: " + xhr.responseText);
+			});
+
+		}
+
+		/*
+			Buscar usuario por nome
+		 */
+		function pesquisaUser() {
+
+			var nome = $('#nomeBusca').val();
+
+			if (nome != null && nome.trim() != '') {
+				$
+						.ajax(
+								{
+									method : "GET",
+									url : "buscarpornome",
+									data : "nome=" + nome,
+									contentType : "application/json; charset=utf-8",
+									success : function(response) {
+
+										$('#tabelaResultado > tbody > tr')
+												.remove();
+
+										var tamanho = response.length - 1;
+
+										console.log(tamanho);
+
+										for (var i = 0; i <= tamanho; i++) {
+											$('#tabelaResultado > tbody')
+													.append(
+															'<tr id="'+ response[i].id +'"><td>'
+																	+ response[i].id
+																	+ '</td><td>'
+																	+ response[i].nome
+																	+ '</td>'
+																	+ '<td><button type="button" onclick="colocarEmEdicao('
+																	+ response[i].id
+																	+ ')" class="btn btn-warning">Ver</button></td>'
+																	+ '<td><button type="button" onclick="deleteUser('
+																	+ response[i].id
+																	+ ')" class="btn btn-danger">Delete</button></td></tr>');
+										}
+
+									}
+								}).fail(function(xhr, status, errorThrown) {
+							alert("Erro ao buscar: " + xhr.responseText);
+						});
+			}
+
+		}
+
+		function colocarEmEdicao(id) {
+
+			$.ajax({
+				method : "GET",
+				url : "buscaruserid",
+				data : "id=" + id,
+				contentType : "application/json; charset=utf-8",
+				success : function(response) {
+					$('#id').val(response.id);
+					$('#nome').val(response.nome);
+					$('#idade').val(response.idade);
+
+					$('#modalPesquisaUser').modal('hide');
+
+				}
+			}).fail(function(xhr, status, errorThrown) {
+				alert("Erro ao buscar usuário por id: " + xhr.responseText);
+			});
+
+		}
+
+		/*DELETE*/
+		function deleteUser(id) {
+
+			var status = 'n';
+
+			if (id == 'null') {
+				id = $('#id').val();
+				status = 's';
+			}
+
+			if (id == "") {
+				alert("Favor informar um Código para deletar usuário");
+			} else {
+				if (confirm("Deseja realmente deletar?")) {
+					$.ajax(
+							{
+								method : "DELETE",
+								url : "delete",
+								data : "id=" + id,
+								success : function(response) {
+
+									if (status === 's') {
+										$('#' + id).remove();
+									}
+
+									document.getElementById('formCadastroUser')
+											.reset();
+
+									alert(response);
+								}
+							}).fail(
+							function(xhr, status, errorThrown) {
+								alert("Erro ao deletar usuário por id: "
+										+ xhr.responseText);
+							});
+				}
+			}
+
+		}
+	</script>
+
+</body>
+</html>
